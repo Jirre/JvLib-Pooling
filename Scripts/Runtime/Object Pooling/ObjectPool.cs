@@ -58,6 +58,10 @@ namespace JvLib.Pooling.Objects
 
             _activeList.Add(pooledObject);
             obj.SetActive(true);
+
+            IPooledObjectListener[] listeners = obj.GetComponentsInChildren<IPooledObjectListener>();
+            foreach (IPooledObjectListener l in listeners) l.OnActivate();
+            
             return obj.gameObject;
         }
 
