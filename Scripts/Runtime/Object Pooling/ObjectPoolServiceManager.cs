@@ -1,22 +1,23 @@
-using Sirenix.OdinInspector;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using JvLib.Services;
 
 namespace JvLib.Pooling.Objects
 {
     [ServiceInterface]
-    public class ObjectPoolServiceManager : APoolService<ObjectPoolManager, ObjectPoolData>
+    public class ObjectPoolServiceManager : APoolService<ObjectPool, ObjectPoolContext, ObjectPoolGroup>
     {
-        protected override ObjectPoolManager InitializePool(IPoolData pContext)
+        internal static readonly Vector3 PASSIVE_POSITION = new Vector3(1000f, 1000f, 1000f);
+
+        protected override ObjectPool InitializePool(IPoolContext pContext)
         {
-            return new GameObject(pContext.Id).AddComponent<ObjectPoolManager>();
+            ObjectPool pool = new GameObject(pContext.Id).AddComponent<ObjectPool>();
+            pool.Initialize((ObjectPoolContext) pContext);
+            return pool;
         }
     }
 
     [System.Serializable]
-    public struct ObjectPoolData : IPoolData
+    public struct ObjectPoolContext : IPoolContext
     {
         [SerializeField] private string _Id;
         public string Id => _Id;

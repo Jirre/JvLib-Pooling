@@ -1,43 +1,45 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-
 using JvLib.Services;
 
 namespace JvLib.Pooling
 {
-    public abstract class APoolService<T, C> : MonoBehaviour, IService
+    /// <summary>
+    /// Base Pooling Service
+    /// </summary>
+    /// <typeparam name="T">Pooling Type</typeparam>
+    /// <typeparam name="C">Pooling Context Type</typeparam>
+    /// <typeparam name="G">Pooling Group Type</typeparam>
+    public abstract class APoolService<T, C, G> : MonoBehaviour, IService
         where T : Component
-        where C : IPoolData
+        where C : IPoolContext
+        where G : APoolGroup<T>, new()
     {
         [SerializeField] private List<C> _Data;
 
-        protected Dictionary<string, T> _pools;
-        protected Dictionary<string, List<IPoolData>> _groups;
+        private Dictionary<string, T> _pools;
+        private Dictionary<string, G> _groups;
 
-        private const string SCENE_NAME = "Pools";
+        private const string SCENE_NAME = "Pooling";
         private Transform _parent;
 
-        private bool _isReady;
-
-        public bool IsReady => _isReady;
+        public bool IsReady { get; private set; }
 
         private void Awake()
         {
             ServiceLocator.Instance.Register(this);
-            Debug.Log("boop");
-            Scene _poolScene = SceneManager.GetSceneByName(SCENE_NAME);
-            if (_poolScene.isLoaded)
+            Scene scene = SceneManager.GetSceneByName(SCENE_NAME);
+            if (scene.isLoaded)
                 return;
 
-            _poolScene = SceneManager.CreateScene(SCENE_NAME);
+            scene = SceneManager.CreateScene(SCENE_NAME);
 
             GameObject obj = new GameObject(GetType().Name);
             _pools = new Dictionary<string, T>();
-            _groups = new Dictionary<string, List<IPoolData>>();
+            _groups = new Dictionary<string, G>();
 
-            foreach (IPoolData data in _Data)
+            foreach (C data in _Data)
             {
                 if (_pools.ContainsKey(data.Id))
                 {
@@ -45,36 +47,44 @@ namespace JvLib.Pooling
                     continue;
                 }
 
-                if(!string.IsNullOrWhiteSpace(data.GroupId))
-                {
-                    if (!_groups.ContainsKey(data.GroupId))
-                        _groups.Add(data.GroupId, new List<IPoolData>());
-                    _groups[data.GroupId].Add(data);
-                }
-
                 T pool = InitializePool(data);
-                pool.transform.SetParent(obj.transform);
-                pool.transform.localPosition = Vector3.zero;
-                pool.transform.localScale = Vector3.one;
-                pool.transform.localRotation = Quaternion.identity;
+                Transform trans = pool.transform;
+                trans.SetParent(obj.transform);
+                trans.localPosition = Vector3.zero;
+                trans.localScale = Vector3.one;
+                trans.localRotation = Quaternion.identity;
 
                 _pools.Add(data.Id, pool);
+
+                if (string.IsNullOrWhiteSpace(data.GroupId)) continue;
+
+                if (!_groups.ContainsKey(data.GroupId))
+                    _groups.Add(data.GroupId, new G());
+                _groups[data.GroupId].Add(pool, data.GroupWeight);
             }
 
-            SceneManager.MoveGameObjectToScene(obj, _poolScene);
+            SceneManager.MoveGameObjectToScene(obj, scene);
 
-            _isReady = true;
+            IsReady = true;
             ServiceLocator.Instance.ReportInstanceReady(this);
         }
 
-        protected abstract T InitializePool(IPoolData pContext);
-    }
+        protected abstract T InitializePool(IPoolContext pContext);
 
-    public interface IPoolData
-    {
-        string Id { get; }
-        
-        string GroupId { get; }
-        float GroupWeight { get; }
+        public T GetPool(string pId)
+        {
+            if (string.IsNullOrWhiteSpace(pId) || _pools == null)
+                return null;
+
+            return !_pools.TryGetValue(pId, out T pool) ? null : pool;
+        }
+
+        public G GetGroup(string pGroupId)
+        {
+            if (string.IsNullOrWhiteSpace(pGroupId) || _groups == null)
+                return null;
+
+            return !_groups.TryGetValue(pGroupId, out G group) ? null : group;
+        }
     }
 }
