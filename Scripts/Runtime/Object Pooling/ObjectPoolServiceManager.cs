@@ -21,8 +21,8 @@ namespace JvLib.Pooling.Objects
     {
         [SerializeField] private string _Id;
         public string Id => _Id;
-        [SerializeField] private GameObject _Source;
-        public GameObject Source => _Source;
+        [SerializeField] private PooledObject _Source;
+        public GameObject Source => _Source.gameObject;
         [SerializeField] private int _Buffer;
         public int Buffer => _Buffer;
 

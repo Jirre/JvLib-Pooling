@@ -30,10 +30,9 @@ namespace JvLib.Pooling
         {
             ServiceLocator.Instance.Register(this);
             Scene scene = SceneManager.GetSceneByName(SCENE_NAME);
-            if (scene.isLoaded)
-                return;
-
-            scene = SceneManager.CreateScene(SCENE_NAME);
+            
+            if (!scene.isLoaded)
+                scene = SceneManager.CreateScene(SCENE_NAME);
 
             GameObject obj = new GameObject(GetType().Name);
             _pools = new Dictionary<string, T>();
