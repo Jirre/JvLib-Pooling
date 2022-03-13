@@ -24,7 +24,7 @@ namespace JvLib.Pooling
         private const string SCENE_NAME = "Pooling";
         private Transform _parent;
 
-        public bool IsReady { get; private set; }
+        public bool IsServiceReady { get; private set; }
 
         private void Awake()
         {
@@ -64,7 +64,7 @@ namespace JvLib.Pooling
 
             SceneManager.MoveGameObjectToScene(obj, scene);
 
-            IsReady = true;
+            IsServiceReady = true;
             ServiceLocator.Instance.ReportInstanceReady(this);
         }
 
