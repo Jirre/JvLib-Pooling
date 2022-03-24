@@ -3,7 +3,7 @@ using JvLib.Services;
 
 namespace JvLib.Pooling.Objects
 {
-    [ServiceInterface]
+    [ServiceInterface(Name = "ObjectPools")]
     public class ObjectPoolServiceManager : APoolService<ObjectPool, ObjectPoolContext, ObjectPoolGroup>
     {
         internal static readonly Vector3 PASSIVE_POSITION = new Vector3(1000f, 1000f, 1000f);

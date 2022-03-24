@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace JvLib.Pooling.Particles
 {
-    [ServiceInterface]
+    [ServiceInterface(Name = "ParticlePools")]
     public class ParticlePoolServiceManager : APoolService<ParticlePool, ParticlePoolContext, ParticlePoolGroup>
     {
         protected override ParticlePool InitializePool(IPoolContext pContext)
