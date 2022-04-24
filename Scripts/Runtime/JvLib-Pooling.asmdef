@@ -1,6 +1,6 @@
 {
     "name": "JvLib-Pooling",
-    "rootNamespace": "",
+    "rootNamespace": "JvLib.Pooling",
     "references": [
         "JvLib-Core"
     ],
